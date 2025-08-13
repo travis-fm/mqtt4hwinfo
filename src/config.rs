@@ -28,8 +28,8 @@ pub struct Sensor {
 
 #[derive(Deserialize, PartialEq, PartialOrd)]
 pub enum SensorType {
-    Temperature,
-    Voltage,
+    Temp,
+    Volt,
     Fan,
     Current,
     Power,
@@ -44,8 +44,8 @@ impl SensorType {
     /// See https://www.hwinfo.com/forum/threads/custom-user-sensors-in-hwinfo.5817/
     fn to_key_base_string(&self) -> String {
         match self {
-            SensorType::Temperature => String::from("Temp"),
-            SensorType::Voltage => String::from("Volt"),
+            SensorType::Temp => String::from("Temp"),
+            SensorType::Volt => String::from("Volt"),
             SensorType::Fan => String::from("Fan"),
             SensorType::Current => String::from("Current"),
             SensorType::Power => String::from("Power"),
