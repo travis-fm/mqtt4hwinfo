@@ -7,3 +7,5 @@ description = "Add MQTT topics as sensors for display in HWiNFO"
 repository = "https://github.com/travis-fm/mqtt4hwinfo"
 
 [dependencies]
+rumqttc = "0.24.0"
+tokio = "1.47.1"
