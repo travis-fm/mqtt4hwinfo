@@ -9,17 +9,21 @@ pub struct BrokerConfig {
 }
 
 #[derive(Deserialize)]
-pub struct DeviceConfig {
-    pub name: String,
-    pub sensors: Vec<SensorConfig>,
+#[serde(rename = "devices")]
+pub struct Device {
+    pub display_name: String,
+    pub sensors: Vec<Sensor>,
 }
 
 #[derive(Deserialize)]
-pub struct SensorConfig {
-    pub sensor_name: String,
-    pub sensor_key_name: String,
+#[serde(rename = "sensors")]
+pub struct Sensor {
+    pub display_name: String,
+    #[serde(default)]
+    pub reg_key_name: String,
     pub sensor_type: SensorType,
     pub mqtt_topic: String,
+    pub unit: Option<String>,
 }
 
 #[derive(Deserialize, PartialEq, PartialOrd)]
@@ -55,7 +59,7 @@ impl SensorType {
 #[derive(Deserialize)]
 pub struct Config {
     pub broker: BrokerConfig,
-    pub devices: Vec<DeviceConfig>,
+    pub devices: Vec<Device>,
 }
 
 impl Config {
@@ -65,7 +69,7 @@ impl Config {
 
         for device in &mut config_str.devices {
             for (i, sensor) in device.sensors.iter_mut().enumerate() {
-                sensor.sensor_key_name =
+                sensor.reg_key_name =
                     sensor.sensor_type.to_key_base_string() + i.to_string().as_str();
             }
         }
