@@ -1,43 +1,36 @@
-use std::time::Duration;
+mod config;
 
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
+use std::time::Duration;
+
+use crate::config::Config;
 
 #[tokio::main]
 async fn main() {
-    let mut mqttoptions = MqttOptions::new("mqtt4hwinfo", "homeassistant0.isrv.localnet.sh", 1883);
-    mqttoptions.set_credentials("test-account", "abc123");
+    let config = Config::load();
+
+    let mut mqttoptions = MqttOptions::new(
+        "mqtt4hwinfo",
+        config.broker.host,
+        config.broker.port.unwrap_or(1883),
+    );
+
+    if let Some(user) = config.broker.username
+        && let Some(pass) = config.broker.password
+    {
+        mqttoptions.set_credentials(user, pass);
+    }
     mqttoptions.set_keep_alive(Duration::from_secs(5));
 
-    let topics = vec![
-        SubscribeFilter::new(
-            "office_pc_power_info/rms_current".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/rms_voltage".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/active_power".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/power_factor".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/total_delivered".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/ac_frequency".to_string(),
-            QoS::AtLeastOnce,
-        ),
-        SubscribeFilter::new(
-            "office_pc_power_info/instant_demand".to_string(),
-            QoS::AtLeastOnce,
-        ),
-    ];
+    let mut topics = vec![];
+    for device in config.devices {
+        for sensor in device.sensors {
+            topics.push(SubscribeFilter {
+                path: sensor.mqtt_topic,
+                qos: QoS::AtLeastOnce,
+            });
+        }
+    }
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe_many(topics).await.unwrap();
