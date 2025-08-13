@@ -1,7 +1,7 @@
 mod config;
 
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
-use std::io::{self, Error};
+use std::io::{self};
 use std::time::Duration;
 use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
