@@ -1,6 +1,6 @@
 [package]
 name = "mqtt4hwinfo"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2024"
 license = "MIT"
 description = "Add MQTT topics as sensors for display in HWiNFO"
