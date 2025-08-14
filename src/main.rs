@@ -1,7 +1,9 @@
 mod config;
 
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
+use std::env;
 use std::io::{self};
+use std::path::Path;
 use std::time::Duration;
 use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 
@@ -9,7 +11,14 @@ use crate::config::{Config, Sensor};
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    let config = Config::load();
+    let args = env::args().collect::<Vec<String>>();
+    let config_path = if args.len() > 1 {
+        Path::new(&args[1])
+    } else {
+        Path::new("./config.toml")
+    };
+
+    let config = Config::load(config_path)?;
 
     let mut mqttoptions = MqttOptions::new(
         "mqtt4hwinfo",
@@ -62,7 +71,7 @@ async fn main() -> io::Result<()> {
 fn update_sensor(device_name: &str, sensor: &Sensor, value: &str) -> io::Result<()> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let sensor_key_path = format!(
-        "Software\\HwiNFO64\\Sensors\\Custom\\{device_name}\\{0}",
+        "Software\\HWiNFO64\\Sensors\\Custom\\{device_name}\\{0}",
         sensor.reg_key_name
     );
     let (sensor_key, _) = hkcu.create_subkey(sensor_key_path)?;

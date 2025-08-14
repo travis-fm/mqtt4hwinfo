@@ -1,3 +1,9 @@
+use std::{
+    fs::File,
+    io::{self, Read},
+    path::{Path, PathBuf},
+};
+
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -63,9 +69,13 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> Self {
+    pub fn load(path: &Path) -> io::Result<Self> {
+        let mut file = File::open(path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+
         let mut config_str: Config =
-            toml::from_str(include_str!("../config.toml")).expect("Failed to parse config.toml");
+            toml::from_str(&contents).expect("Failed to parse config.toml");
 
         for device in &mut config_str.devices {
             for (i, sensor) in device.sensors.iter_mut().enumerate() {
@@ -74,6 +84,6 @@ impl Config {
             }
         }
 
-        config_str
+        Ok(config_str)
     }
 }
