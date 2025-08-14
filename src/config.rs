@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     fs::File,
     io::{self, Read},
     path::{Path, PathBuf},
@@ -32,7 +33,7 @@ pub struct Sensor {
     pub unit: Option<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd)]
+#[derive(Deserialize, PartialEq, PartialOrd, Debug)]
 pub enum SensorType {
     Temp,
     Volt,
@@ -44,12 +45,9 @@ pub enum SensorType {
     Other,
 }
 
-impl SensorType {
-    /// Converts SensorType value into string used for the key base name in the registry.
-    ///
-    /// See https://www.hwinfo.com/forum/threads/custom-user-sensors-in-hwinfo.5817/
-    fn to_key_base_string(&self) -> String {
-        match self {
+impl Display for SensorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
             SensorType::Temp => String::from("Temp"),
             SensorType::Volt => String::from("Volt"),
             SensorType::Fan => String::from("Fan"),
@@ -58,7 +56,9 @@ impl SensorType {
             SensorType::Clock => String::from("Clock"),
             SensorType::Usage => String::from("Usage"),
             SensorType::Other => String::from("Other"),
-        }
+        };
+
+        write!(f, "{string}")
     }
 }
 
@@ -79,8 +79,7 @@ impl Config {
 
         for device in &mut config_str.devices {
             for (i, sensor) in device.sensors.iter_mut().enumerate() {
-                sensor.reg_key_name =
-                    sensor.sensor_type.to_key_base_string() + i.to_string().as_str();
+                sensor.reg_key_name = sensor.sensor_type.to_string() + i.to_string().as_str();
             }
         }
 
