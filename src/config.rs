@@ -2,7 +2,7 @@ use std::{
     fmt::Display,
     fs::File,
     io::{self, Read},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use serde::Deserialize;
