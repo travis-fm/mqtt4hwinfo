@@ -60,7 +60,6 @@ If everything is configured correctly, you should now see your custom devices/se
 [broker]
 host = "<my MQTT broker IP/FQDN>"
 port = 1883
-
 # username/password optional. Remove for anonymous access
 username = "<MQTT account>"
 password = "<MQTT password>"

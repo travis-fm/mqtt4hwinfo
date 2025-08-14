@@ -1,0 +1,74 @@
+[broker]
+host = "<my MQTT broker IP/FQDN>"
+port = 1883
+
+# username/password optional. Remove for anonymous access
+username = "<MQTT account>"
+password = "<MQTT password>"
+
+# Each device goes into a [[devices]] block, with one or more [[devices.sensors]] blocks below it.
+# Each [[devices.sensors]] block should have one of the following sensor_types:
+# * Temp
+# * Volt
+# * Fan
+# * Current
+# * Power
+# * Clock
+# * Usage
+# * Other
+#
+# If the sensor_type is "Other", you can specify a "unit", such as "unit = "kWh"". For the other types, HWiNFO will set the default units to display.
+[[devices]]
+display_name = "PC Power Usage"
+
+[[devices.sensors]]
+display_name = "Active Power"
+sensor_type = "Power"
+mqtt_topic = "office_pc_power_info/active_power"
+
+[[devices.sensors]]
+display_name = "RMS Current"
+sensor_type = "Current"
+mqtt_topic = "office_pc_power_info/rms_current"
+
+[[devices.sensors]]
+display_name = "RMS Voltage"
+sensor_type = "Volt"
+mqtt_topic = "office_pc_power_info/rms_voltage"
+
+[[devices.sensors]]
+display_name = "Power Factor"
+sensor_type = "Usage"
+mqtt_topic = "office_pc_power_info/power_factor"
+
+[[devices.sensors]]
+display_name = "Total Delivered"
+sensor_type = "Other"
+unit = "kWh"
+mqtt_topic = "office_pc_power_info/total_delivered"
+
+[[devices.sensors]]
+display_name = "AC Frequency"
+sensor_type = "Clock"
+mqtt_topic = "office_pc_power_info/ac_frequency"
+
+[[devices.sensors]]
+display_name = "Instantaneous Demand"
+sensor_type = "Power"
+mqtt_topic = "office_pc_power_info/instant_demand"
+
+# To add another device, simply add another [[devices]] block, with another set of [[devices.sensors]]:
+#
+# [[devices]]
+# display_name = "My Next Probe"
+#
+# [[devices.sensors]]
+# display_name = "My Next Temp Sensor"
+# sensor_type = "Temp"
+# mqtt_topic = "office_temperature_probe/actual_temperature"
+#
+# [[devices.sensors]]
+# display_name = "My Next Humidity Sensor"
+# sensor_type = "Other"
+# unit = "%"
+# mqtt_topic = "office_temperature_probe/actual_humidity"
