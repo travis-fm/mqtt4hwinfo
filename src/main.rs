@@ -44,7 +44,9 @@ async fn main() -> io::Result<()> {
     }
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-    client.subscribe_many(topics).await.unwrap();
+    client.subscribe_many(topics).await.unwrap_or_else(|e| {
+        panic!("Error while subscribing to topics: {e}");
+    });
 
     loop {
         let notification = eventloop.poll().await.unwrap();
