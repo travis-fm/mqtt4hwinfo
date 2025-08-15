@@ -49,21 +49,25 @@ async fn main() -> io::Result<()> {
     });
 
     loop {
-        let notification = eventloop.poll().await.unwrap();
+        let notification = eventloop.poll().await;
 
-        if let Event::Incoming(Packet::Publish(publish)) = notification {
-            let topic = publish.topic;
-            let payload = String::from_utf8(publish.payload.to_vec()).unwrap();
-            if let Some(device) = config
-                .devices
-                .iter()
-                .find(|d| d.sensors.iter().any(|s| s.mqtt_topic == topic))
-            {
-                if let Some(sensor) = device.sensors.iter().find(|s| s.mqtt_topic == topic) {
-                    update_sensor(&device.display_name, sensor, &payload)?;
+        match notification {
+            Err(e) => {}
+            Ok(Event::Incoming(Packet::Publish(packet))) => {
+                let topic = packet.topic;
+                let payload = String::from_utf8(packet.payload.to_vec()).unwrap();
+                if let Some(device) = config
+                    .devices
+                    .iter()
+                    .find(|d| d.sensors.iter().any(|s| s.mqtt_topic == topic))
+                {
+                    if let Some(sensor) = device.sensors.iter().find(|s| s.mqtt_topic == topic) {
+                        update_sensor(&device.display_name, sensor, &payload)?;
+                    }
                 }
+                println!("{topic:?} -> {payload:?}");
             }
-            println!("{topic:?} -> {payload:?}");
+            _ => {}
         }
     }
 
