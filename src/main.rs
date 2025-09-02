@@ -1,6 +1,7 @@
 mod config;
 
-use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
+use anyhow::{Context, Result};
+use rumqttc::{AsyncClient, ConnectReturnCode, Event, MqttOptions, Packet, QoS, SubscribeFilter};
 use std::env;
 use std::io::{self};
 use std::path::Path;
@@ -10,7 +11,7 @@ use winreg::{RegKey, enums::HKEY_CURRENT_USER};
 use crate::config::{Config, Sensor};
 
 #[tokio::main]
-async fn main() -> io::Result<()> {
+async fn main() -> Result<()> {
     let args = env::args().collect::<Vec<String>>();
     let config_path = if args.len() > 1 {
         Path::new(&args[1])
@@ -44,15 +45,16 @@ async fn main() -> io::Result<()> {
     }
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-    client.subscribe_many(topics).await.unwrap_or_else(|e| {
-        panic!("Error while subscribing to topics: {e}");
-    });
-
     loop {
-        let notification = eventloop.poll().await;
-
-        match notification {
-            Err(e) => {}
+        match eventloop.poll().await {
+            Ok(Event::Incoming(Packet::ConnAck(connack)))
+                if connack.code == ConnectReturnCode::Success =>
+            {
+                client
+                    .subscribe_many(topics.clone())
+                    .await
+                    .context("Error while subscribing to sensor topics")?;
+            }
             Ok(Event::Incoming(Packet::Publish(packet))) => {
                 let topic = packet.topic;
                 let payload = String::from_utf8(packet.payload.to_vec()).unwrap();
